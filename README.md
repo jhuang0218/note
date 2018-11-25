@@ -132,3 +132,19 @@ public class MockServer {
     }
 }
 ```
+### 4-2
+- WebSecurityConfigurerAdapter
+```java
+public class BrowserSecurityConfig extends WebSecurityConfigurerAdapter {
+    
+    @Override
+    protected void configure(HttpSecurity http) throws Exception {
+        http.formLogin()
+        .and()
+        .authorizeRequests()
+        .anyRequest()
+        .authenticated();
+    }
+}
+```
+- UsernamePasswordAuthenticationFilter -> BasicAuthenticationFilter -> ExceptionTranslation -> FilterSecurityInterceptor
