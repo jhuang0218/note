@@ -148,3 +148,89 @@ public class BrowserSecurityConfig extends WebSecurityConfigurerAdapter {
 }
 ```
 - UsernamePasswordAuthenticationFilter -> BasicAuthenticationFilter -> ExceptionTranslation -> FilterSecurityInterceptor
+### 4-3
+- UserDetailsService
+- UserDetails -> User
+- PasswordEncoder -> BCryptPasswordEncoder
+```java
+public class BrowserSecurityConfig extends WebSecurityConfigurerAdapter {
+    @Bean
+    public PasswordEncoder passwordEncoder(){
+        return new BCryptPasswordEncoder();
+    }
+}
+```
+### 4-4
+- 自定義頁面
+```java
+public class BrowserSecurityConfig extends WebSecurityConfigurerAdapter {
+    
+    @Override
+    protected void configure(HttpSecurity http) throws Exception {
+        http.formLogin()
+        .loginPage("/imooc-signIn.html")
+        .loginProcessingUrl("/authentication/form")
+        .and()
+        .authorizeRequests()
+        .antMatchers("/imooc-signIn.html").permitAll()
+        .anyRequest()
+        .authenticated();
+    }
+}
+```
+- RequestCache、SavedRequest
+```java
+@RestController 
+public class BrowserSecurityController{
+    private RequestCache requestCache = new HttpSessionRequestCache();
+    private RedirectStrategy redirectStrategy = new DefaultRedirectStrategy();
+    
+    @GetMapping("/authentication/require")
+    @ResponseStatus(code = HttpStatus.UNAUTHORIZED)
+    public SimpleResponse requireAuthentication(HttpServletRequest request, HttpServletResponse response){
+        SavedRequest savedRequest = requestCache.getRequest(request, response);
+        if(savedRequest != null){
+            String targetUrl = savedRequest.getRedirectUrl();
+            if(StringUtils.endsWithIgnoreCase(targetUrl, ".html")){
+                redirectStrategy.sendRedirect(request, response);
+            }
+        }
+        return new SimpleResponse("訪問的服務需要身份認證");
+    } 
+}
+```
+### 4-5
+- AuthenticationSuccessHandler
+  - SavedRequestAwareAuthenticationSuccessHandler
+- AuthenticationFailureHandler
+  - SimpleUrlAuthenticationFailureHandler
+### 4-6
+- SecurityContextHolder
+- SecurityContextPersistenceFilter
+- @AuthenticationPrincipal
+### 4-7
+- SessionStrategy -> HttpSessionSessionStrategy
+- OncePerRequestFilter
+### 4-9
+- 配置
+  - PersistentTokenRepository -> JdbcTokenRepositoryImpl
+### 4-11
+- AbstractAuthenticationProcessingFilter -> SmsAuthenticationFilter
+- AbstractAuthenticationToken -> SmsAuthenticationToken
+- AuthenticationProvider -> SmsAuthenticationProvider
+### 5-1
+- OAuth
+  - Provider -> Resource Owner -> Client
+  - authorization code 授權碼模式
+  - resource owner password credentials 密碼模式
+  - client credentials 客戶端模式
+  - implicit 簡化模式
+### 5-2
+- ServiceProvider(AbstractOAuth2ServiceProvider)
+  - OAuth2Operations(OAuth2Template)
+  - Api(AbstractOAuth2ApiBinding)
+- ConnectionFactory(OAuth2ConnectionFactory)
+- Connection(OAuth2Connection)
+- UsersConnectionRepository(JdbcUsersConnectionRepository)
+### 5-4
+- SocialUserDetailsService
